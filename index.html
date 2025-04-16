@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>學校公告跑馬燈</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      color: yellow;
+      font-size: 40px;
+      font-family: "Microsoft JhengHei", sans-serif;
+    }
+    .marquee {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+    .marquee span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 20s linear infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-100%, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="marquee">
+    <span id="message">載入公告中...</span>
+  </div>
+
+  <script>
+    const url = "https://opensheet.elk.sh/17tngwUqBWhmK2ULJGXFbSBm-JjFDMuPmGywY_dvXTCs/Sheet1";
+    let messages = [];
+    let current = 0;
+
+    function updateMessage() {
+      if (messages.length > 0) {
+        document.getElementById("message").innerText = messages[current];
+        current = (current + 1) % messages.length;
+      }
+    }
+
+    function fetchData() {
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          messages = data.map(row => row["公告"] || Object.values(row)[0]);
+          updateMessage();
+        })
+        .catch(err => {
+          console.error("資料載入失敗", err);
+          document.getElementById("message").innerText = "無法載入公告，請稍後再試。";
+        });
+    }
+
+    fetchData();
+    setInterval(updateMessage, 21000);   // 每21秒換一次訊息
+    setInterval(fetchData, 300000);      // 每5分鐘重新抓取資料
+  </script>
+</body>
+</html>
+
