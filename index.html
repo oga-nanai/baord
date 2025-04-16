@@ -34,34 +34,42 @@
   </div>
 
   <script>
-    const url = "https://opensheet.elk.sh/17tngwUqBWhmK2ULJGXFbSBm-JjFDMuPmGywY_dvXTCs/Sheet1";
-    let messages = [];
-    let current = 0;
+  const url = "https://opensheet.elk.sh/17tngwUqBWhmK2ULJGXFbSBm-JjFDMuPmGywY_dvXTCs/Sheet1";
+  let messages = [];
+  let current = 0;
 
-    function updateMessage() {
-      if (messages.length > 0) {
-        document.getElementById("message").innerText = messages[current];
-        current = (current + 1) % messages.length;
-      }
+  function updateMessage() {
+    if (messages.length > 0) {
+      const msgEl = document.getElementById("message");
+      msgEl.classList.remove("marquee-reset");
+
+      // 重設動畫
+      msgEl.style.animation = "none";
+      void msgEl.offsetWidth; // 觸發 reflow
+      msgEl.innerText = messages[current];
+      msgEl.style.animation = "marquee 20s linear infinite";
+
+      current = (current + 1) % messages.length;
     }
+  }
 
-    function fetchData() {
-      fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          messages = data.map(row => row["公告"] || Object.values(row)[0]);
-          updateMessage();
-        })
-        .catch(err => {
-          console.error("資料載入失敗", err);
-          document.getElementById("message").innerText = "無法載入公告，請稍後再試。";
-        });
-    }
+  function fetchData() {
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        messages = data.map(row => row["公告"] || Object.values(row)[0]);
+        updateMessage();
+      })
+      .catch(err => {
+        console.error("資料載入失敗", err);
+        document.getElementById("message").innerText = "無法載入公告，請稍後再試。";
+      });
+  }
 
-    fetchData();
-    setInterval(updateMessage, 21000);   // 每21秒換一次訊息
-    setInterval(fetchData, 300000);      // 每5分鐘重新抓取資料
-  </script>
+  fetchData();
+  setInterval(updateMessage, 21000);   // 每21秒換一次訊息
+  setInterval(fetchData, 300000);      // 每5分鐘重新抓取資料
+</script>
 </body>
 </html>
 
